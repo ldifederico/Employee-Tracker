@@ -3,9 +3,11 @@
 Employee Tracker is a solution for managing a company's employees using node, inquirer, and MySQL. It uses a command-line application that allows the user to:
 
 * View departments, roles, employees
+
 ![View Giphy](view.gif)
 
 * Add departments, roles, employees
+
 ![Adding Giphy](add.gif)
 
 * Update departments, roles, employees
