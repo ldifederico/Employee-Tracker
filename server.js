@@ -81,9 +81,10 @@ function addDepartment() {
     name: "name",
     type: "input",
     message: "Enter name of new department"
-  }).then(function(answer) {
-    var query = "INSERT INTO department (name) VALUES";
-    connection.query(query, { name: answer.name }, function(err, res) {
+  }).then(function({name}) {
+    var query = "INSERT INTO department (name) VALUES (?)";
+    connection.query(query, name, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
@@ -106,9 +107,11 @@ function addRole() {
       type: "input",
       message: "Enter department ID for new role"
     }
-  ]).then(function(answer) {
-    var query = "INSERT INTO role (title, salary, department_id) VALUES";
-    connection.query(query, { title: answer.title, salary: answer.salary, department_id: answer.department_id }, function(err, res) {
+  ]).then(function(res) {
+    var query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+    var role = [res.title, res.salary, res.department_id];
+    connection.query(query, role, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
@@ -129,16 +132,18 @@ function addEmployee() {
     {
       name: "role_id",
       type: "input",
-      message: "Enter role of new employee"
+      message: "Enter role ID of new employee"
     },
     {
       name: "manager_id",
       type: "input",
-      message: "Enter manager of new employee"
+      message: "Enter manager ID of new employee"
     }
-  ]).then(function(answer) {
-    var query = "INSERT INTO employee (firstName, lastName, role_id, manager_id) VALUES";
-    connection.query(query, { firstName: answer.firstName, lastName: answer.lastName, role_id: answer.role_id, manager_id: answer.manager_id }, function(err, res) {
+  ]).then(function(res) {
+    var query = "INSERT INTO employee (firstName, lastName, role_id, manager_id) VALUES (?, ?, ?, ?)";
+    var employee = [res.firstName, res.lastName, res.role_id, res.manager_id]
+    connection.query(query,  employee, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
@@ -156,10 +161,10 @@ function updateDepartment() {
       type: "input",
       message: "Confirm department name"
     }
-  ]).then(function(answer) {
-    var query = "UPDATE department WHERE id=?";
-    var queryCont = "SET (name) VALUES ";
-    connection.query(query + [answer.id] + queryCont + {name: answer.name}, function(err, res) {
+  ]).then(function(res) {
+    var query = "UPDATE department SET name=? WHERE id=?";
+    connection.query(query, [res.name, res.id], function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
@@ -178,19 +183,20 @@ function updateRole() {
       message: "Confirm title of role"
     },
     {
-      name: "lastName",
+      name: "salary",
       type: "input",
       message: "Confirm salary of role"
     },
     {
-      name: "role_id",
+      name: "department_id",
       type: "input",
       message: "Confirm department ID of role"
     }
-  ]).then(function(answer) {
-    var query = "UPDATE role WHERE id=?";
-    var queryCont = "SET (title, salary, department_id) VALUES ";
-    connection.query(query + [answer.id] + queryCont + {title: answer.title, salary: answer.salary, department_id: answer.department_id}, function(err, res) {
+  ]).then(function(res) {
+    var query = "UPDATE role SET title=?, salary=?, department_id=? WHERE id=?";
+    var roleEdit = [res.title, res.salary, res.department_id, res.id];
+    connection.query(query, roleEdit, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
@@ -216,41 +222,48 @@ function updateEmployee() {
     {
       name: "role_id",
       type: "input",
-      message: "Confirm role of employee"
+      message: "Confirm role ID of employee"
     },
     {
       name: "manager_id",
       type: "input",
-      message: "Confirm manager of employee"
+      message: "Confirm manager ID of employee"
     }
-  ]).then(function(answer) {
-    var query = "UPDATE employee WHERE id=?";
-    var queryCont = "SET (firstName, lastName, role_id, manager_id) VALUES ";
-    connection.query(query + [answer.id] + queryCont + {firstName: answer.firstName, lastName: answer.lastName, role_id: answer.role_id, manager_id: answer.manager_id}, function(err, res) {
+  ]).then(function(res) {
+    var query = "UPDATE employee SET firstName=?, lastName=?, role_id=?, manager_id=? WHERE id=?";
+    var employeeEdit = [res.firstName, res.lastName, res.role_id, res.manager_id, res.id];
+    connection.query(query, employeeEdit, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
 }
   
 function viewByDepartment() {
-  connection.query("SELECT * FROM department ORDER BY id", function(err, res) {
+  var query = "SELECT * FROM department";
+  connection.query(query, function(err, res) {
+    if (err) throw (err);
+    console.table(res);
     options();
   });
-  console.table({id: answer.id}, {name: answer.name});
 }
 
 function viewByRole() {
-  connection.query("SELECT * FROM role ORDER BY id", function(err, res) {
+  var query = "SELECT * FROM role";
+  connection.query(query, function(err, res) {
+    if (err) throw (err);
+    console.table(res);
     options();
   });
-  console.table({ title: answer.title}, {salary: answer.salary}, {department_id: answer.department_id });
 }
 
 function viewByEmployee() {
-  connection.query("SELECT * FROM employee ORDER BY id", function(err, res) {
+  var query = "SELECT * FROM employee";
+  connection.query(query, function(err, res) {
+    if (err) throw (err);
+    console.table(res);
     options();
   });
-  console.table({ firstName: answer.firstName}, {lastName: answer.lastName}, {role_id: answer.role_id}, {manager_id: answer.manager_id });
 }
 
 function removeEmployee() {
@@ -258,8 +271,10 @@ function removeEmployee() {
     name: "id",
     type: "input",
     message: "Enter ID of employee to be removed"
-  }).then(function(answer) {
-    connection.query("DELETE FROM employee WHERE id=?", { id: answer.id }, function(err, res) {
+  }).then(function({id}) {
+    var query = "DELETE FROM employee WHERE id=?";
+    connection.query(query, id, function(err, res) {
+      if (err) throw (err);
       options();
     });
   });
